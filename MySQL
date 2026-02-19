@@ -1,0 +1,30 @@
+CREATE DATABASE IF NOT EXISTS face_attendance_db;
+USE face_attendance_db;
+
+-- Table to store user details and face encodings
+CREATE TABLE users (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    role VARCHAR(20) NOT NULL, -- ROLE_ADMIN, ROLE_TEACHER, ROLE_STUDENT
+    department VARCHAR(100),
+    roll_number VARCHAR(50),
+    face_encoding LONGTEXT -- Stores face landmarks as JSON string
+);
+
+-- Table to store attendance records
+CREATE TABLE attendance (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    date DATE NOT NULL,
+    time TIME NOT NULL,
+    status VARCHAR(20) DEFAULT 'PRESENT',
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE(user_id, date) -- Ensures one attendance per user per day
+);
+
+-- Insert a default Admin user (Password: "admin123" encrypted)
+-- BCrypt hash generated for "admin123"
+INSERT INTO users (name, email, password, role, department) 
+VALUES ('Admin User', 'admin@school.com', '$2a$10$Dow7dJqOIlRLvVjxVzqkVuWzQBMPF3ZkJ9F7.dQ8XlClvIvbKvhyG', 'ROLE_ADMIN', 'Management');
