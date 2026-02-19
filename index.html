@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Detection Attendance System</title>
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --primary-color: #0f172a; --secondary-color: #1e293b; --accent-color: #3b82f6; }
+        body { background-color: var(--primary-color); color: #f1f5f9; font-family: 'Segoe UI', sans-serif; }
+        .card { background-color: var(--secondary-color); border: 1px solid #334155; }
+        .btn-primary { background-color: var(--accent-color); border: none; }
+        .btn-primary:hover { background-color: #2563eb; }
+        .form-control { background-color: var(--primary-color); border: 1px solid #334155; color: white; }
+        .form-control:focus { background-color: var(--primary-color); color: white; border-color: var(--accent-color); box-shadow: none; }
+        .sidebar { min-height: 100vh; background-color: var(--secondary-color); border-right: 1px solid #334155; }
+        .sidebar a { color: #94a3b8; text-decoration: none; padding: 15px 20px; display: block; transition: 0.3s; }
+        .sidebar a:hover, .sidebar a.active { background-color: var(--accent-color); color: white; }
+        .hero-section { background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); min-height: 80vh; display: flex; align-items: center; text-align: center; }
+        .video-container { position: relative; }
+        video, canvas { border-radius: 10px; }
+        .overlay { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); padding: 5px 10px; border-radius: 5px; font-size: 12px; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark" style="background-color: var(--secondary-color);">
+    <div class="container">
+        <a class="navbar-brand" href="#" onclick="showPage('home')"><i class="fas fa-face-viewfinder"></i> FaceAttend</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="#" onclick="showPage('home')">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="#" onclick="showPage('features')">Features</a></li>
+                <li class="nav-item" id="nav-login"><a class="nav-link" href="#" onclick="showPage('login')">Login</a></li>
+                <li class="nav-item" id="nav-register"><a class="nav-link btn btn-outline-primary ms-2 px-3" href="#" onclick="showPage('register')">Register</a></li>
+                <li class="nav-item hidden" id="nav-dashboard"><a class="nav-link btn btn-primary ms-2 px-3" href="#" onclick="showPage('dashboard')">Dashboard</a></li>
+                <li class="nav-item hidden" id="nav-logout"><a class="nav-link text-danger" href="#" onclick="logout()">Logout</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- CONTENT CONTAINER -->
+<div id="app-content">
+    <!-- HOME PAGE -->
+    <div id="page-home" class="page-section">
+        <section class="hero-section">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-lg-8 mx-auto">
+                        <h1 class="display-3 fw-bold mb-4">Next-Gen <span class="text-primary">Attendance</span> System</h1>
+                        <p class="lead mb-4 text-secondary">Automate your attendance process using cutting-edge face recognition technology powered by AI and Java Spring Boot.</p>
+                        <button onclick="showPage('register')" class="btn btn-primary btn-lg px-5 py-3 me-3">Get Started <i class="fas fa-arrow-right ms-2"></i></button>
+                        <button onclick="showPage('features')" class="btn btn-outline-light btn-lg px-5 py-3">Learn More</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Features Brief -->
+        <section class="py-5">
+            <div class="container py-5">
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="card h-100 text-center p-4">
+                            <div class="card-body">
+                                <i class="fas fa-bolt fa-3x text-primary mb-3"></i>
+                                <h5 class="card-title">Real-time Detection</h5>
+                                <p class="text-secondary">Instant recognition with live video feed processing.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 text-center p-4">
+                            <div class="card-body">
+                                <i class="fas fa-shield-halved fa-3x text-primary mb-3"></i>
+                                <h5 class="card-title">Secure Data</h5>
+                                <p class="text-secondary">JWT Authentication & encrypted face embeddings.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 text-center p-4">
+                            <div class="card-body">
+                                <i class="fas fa-file-csv fa-3x text-primary mb-3"></i>
+                                <h5 class="card-title">Export Reports</h5>
+                                <p class="text-secondary">Download detailed attendance records instantly.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- LOGIN PAGE -->
+    <div id="page-login" class="page-section hidden">
+        <div class="container py-5">
+            <div class="row justify-content-center">
+                <div class="col-md-5">
+                    <div class="card p-5">
+                        <h3 class="text-center mb-4">Login</h3>
+                        <form id="loginForm">
+                            <div class="mb-3">
+                                <label>Email</label>
+                                <input type="email" id="loginEmail" class="form-control" required placeholder="admin@school.com">
+                            </div>
+                            <div class="mb-3">
+                                <label>Password</label>
+                                <input type="password" id="loginPassword" class="form-control" required placeholder="Enter password">
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100 py-2">Login</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- REGISTER PAGE -->
+    <div id="page-register" class="page-section hidden">
+        <div class="container py-5">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card p-5">
+                        <h3 class="text-center mb-4">Student Registration & Face Capture</h3>
+                        <form id="registerForm">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label>Full Name</label>
+                                        <input type="text" id="regName" class="form-control" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label>Email</label>
+                                        <input type="email" id="regEmail" class="form-control" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label>Department</label>
+                                        <input type="text" id="regDept" class="form-control" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label>Roll Number</label>
+                                        <input type="text" id="regRoll" class="form-control" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label>Password</label>
+                                        <input type="password" id="regPassword" class="form-control" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label>Face Capture</label>
+                                    <div class="video-container">
+                                        <video id="regVideo" width="100%" height="auto" autoplay muted></video>
+                                        <canvas id="regCanvas" class="hidden"></canvas>
+                                        <img id="regSnapshot" class="hidden" width="100%">
+                                    </div>
+                                    <div class="mt-3 d-grid gap-2">
+                                        <button type="button" class="btn btn-info" onclick="startRegCamera()">Start Camera</button>
+                                        <button type="button" class="btn btn-warning" onclick="captureFace()">Capture Face</button>
+                                    </div>
+                                    <input type="hidden" id="faceDescriptorInput">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-success w-100 mt-4 py-2">Register Student</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADMIN DASHBOARD -->
+    <div id="page-dashboard" class="page-section hidden">
+        <div class="row g-0">
+            <!-- Sidebar -->
+            <div class="col-md-2 sidebar">
+                <div class="py-4">
+                    <h5 class="text-center text-muted mb-4">ADMIN PANEL</h5>
+                    <a href="#" class="active" onclick="loadDashboardTab('overview')"><i class="fas fa-tachometer-alt me-2"></i> Overview</a>
+                    <a href="#" onclick="loadDashboardTab('live')"><i class="fas fa-video me-2"></i> Live Attendance</a>
+                    <a href="#" onclick="loadDashboardTab('users')"><i class="fas fa-users me-2"></i> Manage Users</a>
+                    <a href="#" onclick="loadDashboardTab('reports')"><i class="fas fa-file-alt me-2"></i> Reports</a>
+                </div>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="col-md-10 p-5">
+                <!-- Overview Tab -->
+                <div id="tab-overview" class="dashboard-tab">
+                    <h2>Dashboard Overview</h2>
+                    <div class="row mt-4">
+                        <div class="col-md-4 mb-3">
+                            <div class="card p-4 border-start border-4 border-primary">
+                                <h4 id="stat-users">0</h4>
+                                <small class="text-muted">Total Students</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card p-4 border-start border-4 border-success">
+                                <h4 id="stat-today">0</h4>
+                                <small class="text-muted">Present Today</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Attendance Tab -->
+                <div id="tab-live" class="dashboard-tab hidden">
+                    <h2>Live Attendance Session</h2>
+                    <div class="row mt-4">
+                        <div class="col-md-8">
+                            <div class="card p-3">
+                                <div class="video-container">
+                                    <video id="liveVideo" width="100%" autoplay muted></video>
+                                    <canvas id="liveCanvas" class="hidden"></canvas>
+                                    <div class="overlay">LIVE</div>
+                                </div>
+                                <div class="d-flex justify-content-center gap-3 mt-3">
+                                    <button class="btn btn-success" onclick="startLiveDetection()">Start Session</button>
+                                    <button class="btn btn-danger" onclick="stopLiveDetection()">Stop</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card p-3">
+                                <h5>Recognized Today</h5>
+                                <ul id="liveLogList" class="list-group mt-3" style="max-height: 400px; overflow-y: auto;">
+                                    <!-- Dynamic List -->
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reports Tab -->
+                <div id="tab-reports" class="dashboard-tab hidden">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2>Attendance Records</h2>
+                        <button class="btn btn-outline-light" onclick="exportCSV()"><i class="fas fa-download me-2"></i> Export CSV</button>
+                    </div>
+                    <div class="card p-4">
+                        <table class="table table-dark table-striped">
+                            <thead>
+                                <tr><th>Name</th><th>Roll No</th><th>Date</th><th>Time</th><th>Status</th></tr>
+                            </thead>
+                            <tbody id="attendanceTableBody">
+                                <!-- Dynamic Rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Users Tab -->
+                <div id="tab-users" class="dashboard-tab hidden">
+                    <h2>Registered Students</h2>
+                    <div class="card p-4 mt-4">
+                        <table class="table table-dark table-hover">
+                            <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Department</th><th>Action</th></tr></thead>
+                            <tbody id="usersTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Notification -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+  <div id="liveToast" class="toast align-items-center text-white bg-primary border-0" role="alert">
+    <div class="d-flex">
+      <div class="toast-body" id="toast-message">Notification.</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+<script>
+    // --- Configuration ---
+    const API_URL = 'http://localhost:8080/api';
+    let token = localStorage.getItem('token');
+    let liveInterval;
+
+    // --- Navigation & UI ---
+    function showPage(pageId) {
+        document.querySelectorAll('.page-section').forEach(el => el.classList.add('hidden'));
+        document.getElementById('page-' + pageId).classList.remove('hidden');
+        
+        // Auth UI Update
+        if(token) {
+            document.getElementById('nav-login').classList.add('hidden');
+            document.getElementById('nav-register').classList.add('hidden');
+            document.getElementById('nav-dashboard').classList.remove('hidden');
+            document.getElementById('nav-logout').classList.remove('hidden');
+        } else {
+            document.getElementById('nav-login').classList.remove('hidden');
+            document.getElementById('nav-register').classList.remove('hidden');
+            document.getElementById('nav-dashboard').classList.add('hidden');
+            document.getElementById('nav-logout').classList.add('hidden');
+        }
+    }
+
+    function showToast(message, type='primary') {
+        const toast = document.getElementById('liveToast');
+        toast.className = `toast align-items-center text-white bg-${type} border-0`;
+        document.getElementById('toast-message').innerText = message;
+        new bootstrap.Toast(toast).show();
+    }
+
+    // --- Authentication ---
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        try {
+            const res = await fetch(API_URL + '/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: document.getElementById('loginEmail').value,
+                    password: document.getElementById('loginPassword').value
+                })
+            });
+            const data = await res.json();
+            if(data.accessToken) {
+                token = data.accessToken;
+                localStorage.setItem('token', token);
+                showToast('Login Successful!', 'success');
+                showPage('dashboard');
+                loadDashboardData();
+            } else {
+                showToast(data.message || 'Login Failed', 'danger');
+            }
+        } catch(err) { showToast('Server Error', 'danger'); }
+    });
+
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const descriptor = document.getElementById('faceDescriptorInput').value;
+        if(!descriptor) { showToast('Please capture face first!', 'warning'); return; }
+
+        try {
+            const res = await fetch(API_URL + '/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: document.getElementById('regName').value,
+                    email: document.getElementById('regEmail').value,
+                    department: document.getElementById('regDept').value,
+                    rollNumber: document.getElementById('regRoll').value,
+                    password: document.getElementById('regPassword').value,
+                    faceEncoding: descriptor // Sending descriptor string
+                })
+            });
+            const data = await res.json();
+            if(data.message === 'User registered successfully!') {
+                showToast('Registration Successful! Please Login.', 'success');
+                showPage('login');
+            } else { showToast(data.message, 'danger'); }
+        } catch(err) { showToast('Error', 'danger'); }
+    });
+
+    function logout() {
+        localStorage.removeItem('token');
+        token = null;
+        showPage('home');
+        showToast('Logged out', 'secondary');
+    }
+
+    // --- Face API Logic ---
+    async function loadModels() {
+        await faceapi.nets.tinyFaceDetector.loadFromUri('/models');
+        await faceapi.nets.faceLandmark68Net.loadFromUri('/models');
+        await faceapi.nets.faceRecognitionNet.loadFromUri('/models');
+        console.log('Models loaded');
+    }
+    // In production, you need to put model files in static/models folder or use CDN URLs
+    // For demo, we assume models are loaded or using CDN logic from face-api.js documentation
+
+    async function startRegCamera() {
+        const video = document.getElementById('regVideo');
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.srcObject = stream;
+    }
+
+    async function captureFace() {
+        const video = document.getElementById('regVideo');
+        const canvas = document.getElementById('regCanvas');
+        
+        // Load models dynamically if not loaded (using CDN for demo convenience)
+        // Ideally, put files in your project
+        const MODEL_URL = 'https://justadudewhohacks.github.io/face-api.js/models';
+        await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+        await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+        await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
+
+        const detections = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor();
+        
+        if(detections) {
+            const descriptorArray = Array.from(detections.descriptor); // Convert Float32Array to normal array
+            document.getElementById('faceDescriptorInput').value = JSON.stringify(descriptorArray);
+            showToast('Face Captured Successfully!', 'success');
+            
+            // Show snapshot for UI feedback
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            document.getElementById('regSnapshot').src = canvas.toDataURL();
+            document.getElementById('regSnapshot').classList.remove('hidden');
+            video.classList.add('hidden');
+            
+            // Stop camera
+            video.srcObject.getTracks().forEach(track => track.stop());
+        } else {
+            showToast('No face detected. Try again.', 'warning');
+        }
+    }
+
+    // --- Dashboard Logic ---
+    async function loadDashboardData() {
+        if(!token) return;
+        // Load Users Count
+        // Load Today Attendance
+        loadTodayAttendance();
+        loadUsers();
+    }
+
+    function loadDashboardTab(tabName) {
+        document.querySelectorAll('.dashboard-tab').forEach(el => el.classList.add('hidden'));
+        document.getElementById('tab-' + tabName).classList.remove('hidden');
+        if(tabName === 'live') startLiveFeed();
+    }
+
+    async function loadTodayAttendance() {
+        const res = await fetch(API_URL + '/face/attendance/today', { headers: { 'Authorization': `Bearer ${token}` }});
+        const data = await res.json();
+        document.getElementById('stat-today').innerText = data.length;
+        
+        const tbody = document.getElementById('attendanceTableBody');
+        tbody.innerHTML = '';
+        data.forEach(att => {
+            tbody.innerHTML += `<tr>
+                <td>${att.user.name}</td>
+                <td>${att.user.rollNumber}</td>
+                <td>${att.date}</td>
+                <td>${att.time}</td>
+                <td><span class="badge bg-success">${att.status}</span></td>
+            </tr>`;
+        });
+    }
+
+    async function loadUsers() {
+        const res = await fetch(API_URL + '/users', { headers: { 'Authorization': `Bearer ${token}` }});
+        const data = await res.json();
+        document.getElementById('stat-users').innerText = data.length;
+        
+        const tbody = document.getElementById('usersTableBody');
+        tbody.innerHTML = '';
+        data.forEach(user => {
+            tbody.innerHTML += `<tr>
+                <td>${user.id}</td>
+                <td>${user.name}</td>
+                <td>${user.email}</td>
+                <td>${user.department}</td>
+                <td><button class="btn btn-sm btn-danger" onclick="deleteUser(${user.id})">Delete</button></td>
+            </tr>`;
+        });
+    }
+
+    // --- Live Attendance ---
+    async function startLiveFeed() {
+        const video = document.getElementById('liveVideo');
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.srcObject = stream;
+    }
+
+    async function startLiveDetection() {
+        const video = document.getElementById('liveVideo');
+        const MODEL_URL = 'https://justadudewhohacks.github.io/face-api.js/models';
+        await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+        await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+        await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
+
+        showToast('Recognition Started...', 'info');
+        liveInterval = setInterval(async () => {
+            const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor();
+            if(detection) {
+                // Send to backend
+                const descriptor = Array.from(detection.descriptor);
+                const res = await fetch(API_URL + '/face/mark', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ faceDescriptor: descriptor })
+                });
+                const data = await res.text();
+                if(data.includes("marked for")) {
+                    // Success UI update
+                    const name = data.replace("Attendance marked for ", "");
+                    addLiveLog(name);
+                    showToast(data, 'success');
+                } else {
+                    console.log("Not recognized or duplicate");
+                }
+            }
+        }, 3000); // Check every 3 seconds
+    }
+
+    function stopLiveDetection() {
+        clearInterval(liveInterval);
+        showToast('Session Stopped', 'warning');
+    }
+
+    function addLiveLog(name) {
+        const list = document.getElementById('liveLogList');
+        const time = new Date().toLocaleTimeString();
+        const item = document.createElement('li');
+        item.className = 'list-group-item bg-dark text-light';
+        item.innerText = `${name} - ${time}`;
+        list.prepend(item);
+    }
+
+    // --- Helper Functions ---
+    function exportCSV() {
+        // Frontend logic to download table data
+        let table = document.getElementById('attendanceTableBody');
+        let csv = [];
+        for (let row of table.rows) {
+            let cols = [];
+            for (let cell of row.cells) cols.push(cell.innerText);
+            csv.push(cols.join(","));
+        }
+        let csvContent = "data:text/csv;charset=utf-8," + csv.join("\n");
+        let link = document.createElement("a");
+        link.setAttribute("href", encodeURI(csvContent));
+        link.setAttribute("download", "attendance_report.csv");
+        document.body.appendChild(link);
+        link.click();
+    }
+
+    // Init
+    showPage('home');
+</script>
+</body>
+</html>
